@@ -41,7 +41,7 @@ bool GenerateTextFile(const Parser &parser,
                       const std::string &file_name,
                       const GeneratorOptions &opts) {
   if (!parser.builder_.GetSize()) return true;
-  if (!parser.root_struct_def) Error("root_type not set");
+  if (!parser.root_struct_defs.size()) Error("root_type not set");
   std::string text;
   GenerateText(parser, parser.builder_.GetBufferPointer(), opts,
                &text);

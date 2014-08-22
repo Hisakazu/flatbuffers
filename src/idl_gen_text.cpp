@@ -241,9 +241,9 @@ static void GenStruct(const StructDef &struct_def, const Table *table,
 void GenerateText(const Parser &parser, const void *flatbuffer,
                   const GeneratorOptions &opts, std::string *_text) {
   std::string &text = *_text;
-  assert(parser.root_struct_def);  // call SetRootType()
+  assert(parser.root_struct_defs.size());  // call SetRootType()
   text.reserve(1024);   // Reduce amount of inevitable reallocs.
-  GenStruct(*parser.root_struct_def,
+  GenStruct(*parser.root_struct_defs.back(),
             GetRoot<Table>(flatbuffer),
             0,
             opts,

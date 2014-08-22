@@ -777,8 +777,8 @@ void Parser::ParseDecl() {
 }
 
 bool Parser::SetRootType(const char *name) {
-  root_struct_def = structs_.Lookup(name);
-  return root_struct_def != nullptr;
+  root_struct_defs.push_back(structs_.Lookup(name));
+  return root_struct_defs.back() != nullptr;
 }
 
 bool Parser::Parse(const char *source) {
@@ -799,11 +799,11 @@ bool Parser::Parse(const char *source) {
         }
         Expect(';');
       } else if (token_ == '{') {
-        if (!root_struct_def) Error("no root type set to parse json with");
+        if (!root_struct_defs.size()) Error("no root type set to parse json with");
         if (builder_.GetSize()) {
           Error("cannot have more than one json object in a file");
         }
-        builder_.Finish(Offset<Table>(ParseTable(*root_struct_def)));
+        builder_.Finish(Offset<Table>(ParseTable(*root_struct_defs.back())));
       } else if (token_ == kTokenEnum) {
         ParseEnum(false);
       } else if (token_ == kTokenUnion) {
@@ -814,7 +814,7 @@ bool Parser::Parse(const char *source) {
         Expect(kTokenIdentifier);
         if (!SetRootType(root_type.c_str()))
           Error("unknown root type: " + root_type);
-        if (root_struct_def->fixed)
+        if (root_struct_defs.back()->fixed)
           Error("root type must be a table");
         Expect(';');
       } else if (token_ == kTokenFileIdentifier) {

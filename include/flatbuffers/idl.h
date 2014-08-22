@@ -242,7 +242,6 @@ struct EnumDef : public Definition {
 class Parser {
  public:
   Parser() :
-    root_struct_def(nullptr),
     source_(nullptr),
     cursor_(nullptr),
     line_(1) {}
@@ -283,7 +282,7 @@ class Parser {
   std::string error_;         // User readable error_ if Parse() == false
 
   FlatBufferBuilder builder_;  // any data contained in the file
-  StructDef *root_struct_def;
+  std::vector<StructDef *> root_struct_defs;
   std::string file_identifier_;
   std::string file_extension_;
 

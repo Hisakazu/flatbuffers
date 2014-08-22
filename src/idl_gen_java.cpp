@@ -163,7 +163,7 @@ static void GenStructBody(const StructDef &struct_def, std::string *code_ptr,
 
 static void GenStruct(StructDef &struct_def,
                       std::string *code_ptr,
-                      StructDef *root_struct_def) {
+                      std::vector<StructDef *> root_struct_defs) {
   if (struct_def.generated) return;
   std::string &code = *code_ptr;
 
@@ -176,7 +176,14 @@ static void GenStruct(StructDef &struct_def,
   GenComment(struct_def.doc_comment, code_ptr);
   code += "public class " + struct_def.name + " extends ";
   code += struct_def.fixed ? "Struct" : "Table";
-  if (&struct_def == root_struct_def) {
+  bool is_root = false;
+  for (auto it = root_struct_defs.begin(); it != root_struct_defs.end(); ++it) {
+	if (&struct_def == *it) {
+	  is_root = true;
+	  break;
+	}
+  }
+  if (is_root) {
     // We need the length and offset to implement Serializable interface.
     code += " implements java.io.Serializable {\n";
     code += "  public int length;\n";
@@ -409,7 +416,7 @@ bool GenerateJava(const Parser &parser,
   for (auto it = parser.structs_.vec.begin();
        it != parser.structs_.vec.end(); ++it) {
     std::string declcode;
-    GenStruct(**it, &declcode, parser.root_struct_def);
+    GenStruct(**it, &declcode, parser.root_struct_defs);
     if (!SaveClass(parser, **it, declcode, path, true))
       return false;
   }

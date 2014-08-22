@@ -467,31 +467,31 @@ std::string GenerateCPP(const Parser &parser, const std::string &include_guard_i
     code += enum_code_post;
 
     // Generate convenient global helper functions:
-    if (parser.root_struct_def) {
+    for (auto it = parser.root_struct_defs.begin(); it != parser.root_struct_defs.end(); ++it) {
       // The root datatype accessor:
-      code += "inline const " + parser.root_struct_def->name + " *Get";
-      code += parser.root_struct_def->name;
+      code += "inline const " + (*it)->name + " *Get";
+      code += (*it)->name;
       code += "(const void *buf) { return flatbuffers::GetRoot<";
-      code += parser.root_struct_def->name + ">(buf); }\n\n";
+      code += (*it)->name + ">(buf); }\n\n";
 
       // The root verifier:
       code += "inline bool Verify";
-      code += parser.root_struct_def->name;
+      code += (*it)->name;
       code += "Buffer(const flatbuffers::Verifier &verifier) { "
               "return verifier.VerifyBuffer<";
-      code += parser.root_struct_def->name + ">(); }\n\n";
+      code += (*it)->name + ">(); }\n\n";
 
       // Finish a buffer with a given root object:
-      code += "inline void Finish" + parser.root_struct_def->name;
+      code += "inline void Finish" + (*it)->name;
       code += "Buffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<";
-      code += parser.root_struct_def->name + "> root) { fbb.Finish(root";
+      code += (*it)->name + "> root) { fbb.Finish(root";
       if (parser.file_identifier_.length())
         code += ", \"" + parser.file_identifier_ + "\"";
       code += "); }\n\n";
 
       if (parser.file_identifier_.length()) {
         // Check if a buffer has the identifier.
-        code += "inline bool " + parser.root_struct_def->name;
+        code += "inline bool " + (*it)->name;
         code += "BufferHasIdentifier(const void *buf) { return flatbuffers::";
         code += "BufferHasIdentifier(buf, \"" + parser.file_identifier_;
         code += "\"); }\n\n";
