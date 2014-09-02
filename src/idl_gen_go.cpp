@@ -513,12 +513,19 @@ static void GenTableBuilders(const StructDef &struct_def,
 // Generate struct or table methods.
 static void GenStruct(const StructDef &struct_def,
                       std::string *code_ptr,
-                      StructDef *root_struct_def) {
+                      std::vector<StructDef *>root_struct_defs) {
   if (struct_def.generated) return;
 
   Comment(struct_def.doc_comment, code_ptr);
   BeginClass(struct_def, code_ptr);
-  if (&struct_def == root_struct_def) {
+  bool is_root = false;
+  for (auto it = root_struct_defs.begin(); it != root_struct_defs.end(); ++it) {
+	if (&struct_def == *it) {
+	  is_root = true;
+	  break;
+	}
+  }
+  if (is_root) {
     // Generate a special accessor for the table that has been declared as
     // the root type.
     NewRootTypeFromBuffer(struct_def, code_ptr);
@@ -668,7 +675,7 @@ bool GenerateGo(const Parser &parser,
   for (auto it = parser.structs_.vec.begin();
        it != parser.structs_.vec.end(); ++it) {
     std::string declcode;
-    go::GenStruct(**it, &declcode, parser.root_struct_def);
+    go::GenStruct(**it, &declcode, parser.root_struct_defs);
     if (!go::SaveType(parser, **it, declcode, path, true))
       return false;
   }
